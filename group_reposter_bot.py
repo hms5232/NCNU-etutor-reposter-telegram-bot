@@ -79,12 +79,27 @@ def hello(bot, update):
 	"""
 
 
+# 更新設定檔
+def reload_config(bot, update):
+	new_env = ConfigParser()
+	new_env.read('config.ini')
+
+	global telegram_bot_token, fb_token, fb_group_id
+
+	telegram_bot_token = new_env.get('reposter', 'telegram_bot_token')
+	fb_token = new_env['reposter']['fb_token']
+	fb_group_id = new_env['reposter']['fb_group_id']
+
+	update.message.reply_text('OK, config updated!')
+
+
 # CommandHandler('指令', 要執行的函數)，使用者輸入「/指令」
 updater.dispatcher.add_handler(CommandHandler(['start', 'about'], welcome))  # 歡迎訊息 / 機器人資訊
 updater.dispatcher.add_handler(CommandHandler('info', show_user_info))  # 顯示使用者資訊
 #updater.dispatcher.add_handler(CommandHandler('post', post))  # TODO: 發公告
 updater.dispatcher.add_handler(CommandHandler('latest', show_latest_posts))  # 顯示最新幾篇貼文
 updater.dispatcher.add_handler(CommandHandler(['hello', 'hi'], hello))  # Hello World!
+updater.dispatcher.add_handler(CommandHandler('reload', reload_config))  # 重新讀取設定檔
 
 
 # 執行機器人必須要的，讓機器人運作聽命
