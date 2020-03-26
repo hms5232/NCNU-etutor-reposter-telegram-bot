@@ -2,3 +2,6 @@
 telegram_bot_token = 
 fb_token = 
 fb_group_id = 
+
+telegram_admin_id = 
+fb_admin_id = 

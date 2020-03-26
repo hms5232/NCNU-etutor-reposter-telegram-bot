@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Author：hms5232
 Repo：https://github.com/hms5232/NCNU-etutor-reposter-telegram-bot
@@ -81,6 +83,13 @@ def hello(bot, update):
 
 # 更新設定檔
 def reload_config(bot, update):
+	# 先檢查是不是 telegram 管理員
+	if not is_telegram_admin(update.message.from_user.id):
+		# 不是管理員更新個X
+		# TODO: 發通知到群組？
+		update.message.reply_text('Permission denied!')
+		return
+	
 	new_env = ConfigParser()
 	new_env.read('config.ini')
 
@@ -91,6 +100,15 @@ def reload_config(bot, update):
 	fb_group_id = new_env['reposter']['fb_group_id']
 
 	update.message.reply_text('OK, config updated!')
+
+
+# 確認使用者是否為指定的 telegram 管理員
+def is_telegram_admin(telegram_user_id):
+	telegram_user_id = str(telegram_user_id)  # 當前使用者 user id
+	env = ConfigParser()
+	env.read('config.ini')
+	telegram_admins = [str_val for str_val in env['reposter']['telegram_admin_id'].split(',')]
+	return telegram_user_id in telegram_admins
 
 
 # CommandHandler('指令', 要執行的函數)，使用者輸入「/指令」
