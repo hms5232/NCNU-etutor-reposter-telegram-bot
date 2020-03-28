@@ -10,6 +10,8 @@ Bug：https://github.com/hms5232/NCNU-etutor-reposter-telegram-bot/issues
 from telegram.ext import Updater, CommandHandler
 from configparser import ConfigParser
 import requests
+import time
+import threading
 
 
 # 設定一些個人的環境變數
@@ -19,6 +21,9 @@ env.read('config.ini')
 telegram_bot_token = env.get('reposter', 'telegram_bot_token')
 fb_token = env['reposter']['fb_token']
 fb_group_id = env['reposter']['fb_group_id']
+
+
+listen_status = True;  # 機器人是否監聽新貼文的狀態
 
 
 """
@@ -111,6 +116,61 @@ def is_telegram_admin(telegram_user_id):
 	return telegram_user_id in telegram_admins
 
 
+# 監聽社團
+def listen():
+	print('thread')
+	while True:
+		if listen_status:
+			r = requests.get('https://graph.facebook.com/{}/feed?fields=admin_creator,created_time,id,message,message_tags,permalink_url,link,from&access_token={}'.format(fb_group_id, fb_token))
+			# TODO: 分析內容並轉貼
+			
+			time.sleep(30)
+		else:
+			return
+
+
+# 叫機器人起來工作了
+def start_work(bot, update):
+	# 先檢查是不是 telegram 管理員
+	if not is_telegram_admin(update.message.from_user.id):
+		# 不是管理員用個X
+		# TODO: 發通知到群組？
+		update.message.reply_text('Permission denied!')
+		return
+	
+	global listen_status
+	listen_status = True
+	if listen_status:
+		listen_group.start()  # 開新執行緒
+		# 確認執行緒是不是真的開啟了
+		if listen_group.is_alive():
+			update.message.reply_text('OK, I go to work now QQ.')
+		else:
+			update.message.reply_text('Oh no, something went wrong.')
+	else:
+		update.message.reply_text('Oh no, something went wrong.')
+
+
+# 機器人可以下班休息下囉，可是還是要待命（慣老闆語氣）
+def unlisten(bot, update):
+	# 先檢查是不是 telegram 管理員
+	if not is_telegram_admin(update.message.from_user.id):
+		# 不是管理員用個X
+		# TODO: 發通知到群組？
+		update.message.reply_text('Permission denied!')
+		return
+	
+	global listen_status, listen_group
+	listen_status = False
+	listen_group.join()  # 關閉執行緒
+	print("thread killed")
+	listen_group = threading.Thread(target = listen)  # 重新設定執行緒
+	if not listen_status and not listen_group.is_alive():
+		update.message.reply_text('OK, now I get off work. YA~!')
+	else:
+		update.message.reply_text('Oh no, something went wrong.')
+
+
 # CommandHandler('指令', 要執行的函數)，使用者輸入「/指令」
 updater.dispatcher.add_handler(CommandHandler(['start', 'about'], welcome))  # 歡迎訊息 / 機器人資訊
 updater.dispatcher.add_handler(CommandHandler('info', show_user_info))  # 顯示使用者資訊
@@ -118,7 +178,11 @@ updater.dispatcher.add_handler(CommandHandler('info', show_user_info))  # 顯示
 updater.dispatcher.add_handler(CommandHandler('latest', show_latest_posts))  # 顯示最新幾篇貼文
 updater.dispatcher.add_handler(CommandHandler(['hello', 'hi'], hello))  # Hello World!
 updater.dispatcher.add_handler(CommandHandler('reload', reload_config))  # 重新讀取設定檔
+updater.dispatcher.add_handler(CommandHandler('work', start_work))  # 開始社畜生活囉
+updater.dispatcher.add_handler(CommandHandler('rest', unlisten))  # 可以下班了
 
+
+listen_group = threading.Thread(target = listen)  # 採用多執行緒來監聽
 
 # 執行機器人必須要的，讓機器人運作聽命
 updater.start_polling()
