@@ -160,6 +160,7 @@ def unlisten(bot, update):
 		update.message.reply_text('Permission denied!')
 		return
 	
+	print("stop thread")
 	global listen_status, listen_group
 	listen_status = False
 	listen_group.join()  # 關閉執行緒
@@ -171,6 +172,17 @@ def unlisten(bot, update):
 		update.message.reply_text('Oh no, something went wrong.')
 
 
+# 看看 bot 是否正在監聽社團貼文
+def bot_work_status(bot, update):
+	now_status = ''
+	if listen_group.is_alive():
+		now_status = now_status + 'ξ( ✿＞◡❛)▄︻▇▇〓▄︻┻┳═一監聽社團貼文中\n'
+	else:
+		now_status = now_status + '現在是手動模式(:3[__]4\n'
+
+	update.message.reply_text(now_status)
+
+
 # CommandHandler('指令', 要執行的函數)，使用者輸入「/指令」
 updater.dispatcher.add_handler(CommandHandler(['start', 'about'], welcome))  # 歡迎訊息 / 機器人資訊
 updater.dispatcher.add_handler(CommandHandler('info', show_user_info))  # 顯示使用者資訊
@@ -180,9 +192,11 @@ updater.dispatcher.add_handler(CommandHandler(['hello', 'hi'], hello))  # Hello 
 updater.dispatcher.add_handler(CommandHandler('reload', reload_config))  # 重新讀取設定檔
 updater.dispatcher.add_handler(CommandHandler('work', start_work))  # 開始社畜生活囉
 updater.dispatcher.add_handler(CommandHandler('rest', unlisten))  # 可以下班了
+updater.dispatcher.add_handler(CommandHandler('status', bot_work_status))  # 看看現在 bot 有在認真看貼文嗎
 
 
 listen_group = threading.Thread(target = listen)  # 採用多執行緒來監聽
+
 
 # 執行機器人必須要的，讓機器人運作聽命
 updater.start_polling()
