@@ -23,7 +23,7 @@ fb_token = env['reposter']['fb_token']
 fb_group_id = env['reposter']['fb_group_id']
 
 
-listen_status = True;  # 機器人是否監聽新貼文的狀態
+listen_status = True  # 機器人是否監聽新貼文的狀態
 
 
 """
@@ -119,11 +119,22 @@ def is_telegram_admin(telegram_user_id):
 # 監聽社團
 def listen():
 	print('thread')
+	failed_request_times = 0
 	while True:
 		if listen_status:
 			r = requests.get('https://graph.facebook.com/{}/feed?fields=admin_creator,created_time,id,message,message_tags,permalink_url,link,from&access_token={}'.format(fb_group_id, fb_token))
-			# TODO: 分析內容並轉貼
-			
+			if r.status_code == 200:  # OK
+				failed_request_times = 0  # 重設歸零
+				# TODO: 分析內容並轉貼
+				pass
+			else:
+				failed_request_times += 1
+				
+				# 失敗超過一定次數就停止
+				if failed_request_times >= 5:
+					# TODO: 通知大家
+					print("Attempt failed too many times!")
+					return
 			time.sleep(30)
 		else:
 			return
@@ -138,8 +149,9 @@ def start_work(bot, update):
 		update.message.reply_text('Permission denied!')
 		return
 	
-	global listen_status
+	global listen_status, listen_group
 	listen_status = True
+	listen_group = threading.Thread(target = listen)  # 重新設定執行緒
 	if listen_status:
 		listen_group.start()  # 開新執行緒
 		# 確認執行緒是不是真的開啟了
