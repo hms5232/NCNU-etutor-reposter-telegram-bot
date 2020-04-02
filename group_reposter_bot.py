@@ -66,7 +66,7 @@ def show_user_info(bot, update):
 	user_info = user_info + '所在的聊天室 type：{}\n'.format(update.message.chat.type)
 	user_info = user_info + '訊息內容：{}\n'.format(update.message.text)
 	
-	update.message.reply_text(user_info)
+	update.message.reply_text(user_info, disable_notification="True")
 
 
 # TODO: 顯示最新幾篇貼文的資訊
