@@ -4,11 +4,6 @@
 ## 需求
 1. Python 3.7.6 or later
 2. pip 套件管理器
-3. python-telegram-bot
-4. ConfigParser
-5. requests
-6. time
-7. threading
 
 ## 建立環境
 ※ 如果電腦同時安裝有Python 2 和 3 版本，請使用 pip3 來進行接下來的所有操作

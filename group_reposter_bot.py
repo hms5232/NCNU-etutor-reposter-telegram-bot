@@ -12,6 +12,7 @@ from configparser import ConfigParser
 import requests
 import time
 import threading
+import os
 
 
 # 設定一些個人的環境變數
@@ -149,6 +150,11 @@ def start_work(bot, update):
 		update.message.reply_text('Permission denied!')
 		return
 	
+	# 再來，檢查工作必備的東西是否都準備好了
+	if before_work_check():
+		update.message.reply_text('Init error!')
+		return
+	
 	global listen_status, listen_group
 	listen_status = True
 	listen_group = threading.Thread(target = listen)  # 重新設定執行緒
@@ -193,6 +199,17 @@ def bot_work_status(bot, update):
 		now_status = now_status + '現在是手動模式(:3[__]4\n'
 
 	update.message.reply_text(now_status)
+
+
+# 開始工作之前的檢查
+def before_work_check():
+	# 檢查必要檔案是否存在
+	if not os.path.isfile('repost.txt'):
+		with open('repost.txt', 'w', encoding='UTF-8') as nf:
+			if not os.path.isfile('repost.txt'):
+				print("An error occurred when try to create reposter.txt!")
+				return 1
+	return 0
 
 
 # CommandHandler('指令', 要執行的函數)，使用者輸入「/指令」
