@@ -22,6 +22,8 @@ env.read('config.ini')
 telegram_bot_token = env.get('reposter', 'telegram_bot_token')
 fb_token = env['reposter']['fb_token']
 fb_group_id = env['reposter']['fb_group_id']
+telegram_group_id = env['reposter']['telegram_group_id']
+telegram_channel_id = env['reposter']['telegram_channel_id']
 
 
 listen_status = True  # 機器人是否監聽新貼文的狀態
@@ -99,11 +101,13 @@ def reload_config(bot, update):
 	new_env = ConfigParser()
 	new_env.read('config.ini')
 
-	global telegram_bot_token, fb_token, fb_group_id
+	global telegram_bot_token, fb_token, fb_group_id, telegram_group_id, telegram_channel_id
 
 	telegram_bot_token = new_env.get('reposter', 'telegram_bot_token')
 	fb_token = new_env['reposter']['fb_token']
 	fb_group_id = new_env['reposter']['fb_group_id']
+	telegram_group_id = new_env['reposter']['telegram_group_id']
+	telegram_channel_id = new_env['reposter']['telegram_channel_id']
 
 	update.message.reply_text('OK, config updated!')
 
@@ -118,7 +122,7 @@ def is_telegram_admin(telegram_user_id):
 
 
 # 監聽社團
-def listen():
+def listen(bot):
 	print('thread')
 	failed_request_times = 0
 	while listen_status:
@@ -126,8 +130,26 @@ def listen():
 		print(r.status_code)
 		if r.status_code == 200:  # OK
 			failed_request_times = 0  # 重設歸零
-			# TODO: 分析內容並轉貼
-			pass
+			find_last_post_with_tag = False
+			is_new_post = False
+			for posts in r.json()['data']:
+				if find_last_post_with_tag:
+					break
+				
+				if 'message_tags' in posts:  # 有 hash tag
+					for tags in posts['message_tags']:
+						if tags['id'] == '276859169113184':  # FB 上對「telegram」這個 hash tag 給的 id
+							with open('repost.txt', 'r', encoding='UTF-8') as f:
+								if f.read().find(posts['id']) == -1:  # 沒有比對到符合字串 => 還沒 PO 過
+									is_new_post = True
+							if is_new_post:
+								with open('repost.txt', 'w+', encoding='UTF-8') as f:
+									f.write(posts['id'])
+									print(posts['id'])
+									# 轉貼
+									repost_message = posts['message'].replace('#telegram', '').replace('#Telegram', '') + '\n原文連結：' + posts['permalink_url'] + '\n\n\n_等待管理員增加 hashtag_'
+									bot.send_message(telegram_channel_id, repost_message, parse_mode='Markdown')
+							find_last_post_with_tag = True
 		else:
 			failed_request_times += 1
 			
@@ -136,7 +158,7 @@ def listen():
 				# TODO: 通知大家
 				print("Attempt failed too many times!")
 				return
-		time.sleep(30)
+		time.sleep(20)
 	return
 
 
@@ -156,7 +178,7 @@ def start_work(bot, update):
 	
 	global listen_status, listen_group
 	listen_status = True
-	listen_group = threading.Thread(target = listen)  # 重新設定執行緒
+	listen_group = threading.Thread(target = listen, args=(bot,))  # 重新設定執行緒
 	if listen_status:
 		listen_group.start()  # 開新執行緒
 		# 確認執行緒是不是真的開啟了
@@ -182,7 +204,7 @@ def unlisten(bot, update):
 	listen_status = False
 	listen_group.join()  # 關閉執行緒
 	print("thread killed")
-	listen_group = threading.Thread(target = listen)  # 重新設定執行緒
+	listen_group = threading.Thread(target = listen, args=(bot,))  # 重新設定執行緒
 	if not listen_status and not listen_group.is_alive():
 		update.message.reply_text('OK, now I get off work. YA~!')
 	else:
@@ -225,8 +247,8 @@ def before_work_check():
 								nf.write(posts['id'])
 								print("Find post with specific hashtag, bot record it now.")
 								find_last_post_with_tag = True
-							else:
-								print("Can't find post with specific hashtag")
+						if not find_last_post_with_tag:
+							print("Can't find post with specific hashtag")
 			else:
 				return 1
 	

@@ -5,7 +5,9 @@
 1. Python 3.7.6 or later
 2. pip 套件管理器
 
-## 建立環境
+## 建立環境 / 部署
+※注意！資料夾需要是**可讀寫**的狀態
+### 一般方式
 ※ 如果電腦同時安裝有Python 2 和 3 版本，請使用 pip3 來進行接下來的所有操作
 1. 安裝 Python（至少 3.7.6 或更新的版本）
 2. 安裝 pip（Linux 請安裝 pip3，例如：`sudo apt install python3-pip`）
@@ -14,7 +16,7 @@
 5. 複製 config.ini.example 成 config.ini 並填入對應的設定內容
 6. 切換至專案目錄底下後，Windows 使用者請執行 `py group_reposter_bot.py.py`或直接點擊 .py 檔案；Linux 使用者請執行 `python3 group_reposter_bot.py`
 
-## 部署（使用 pipenv）
+### 使用 pipenv
 1. 安裝 Python（至少 3.7.6 或更新的版本）
 2. 安裝 pip（Linux 請安裝 pip3，例如：`sudo apt install python3-pip`）
 3. `pip install pipenv`

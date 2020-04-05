@@ -1,5 +1,8 @@
 [reposter]
 telegram_bot_token = 
+telegram_group_id = 
+telegram_channel_id = 
+
 fb_token = 
 fb_group_id = 
 
