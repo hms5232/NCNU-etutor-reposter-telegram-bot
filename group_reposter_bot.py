@@ -123,11 +123,11 @@ def is_telegram_admin(telegram_user_id):
 
 # 監聽社團
 def listen(bot):
-	print('thread')
+	print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", 'thread start')
 	failed_request_times = 0
 	while listen_status:
 		r = requests.get('https://graph.facebook.com/{}/feed?fields=admin_creator,created_time,id,message,message_tags,permalink_url,link,from&access_token={}'.format(fb_group_id, fb_token))
-		print(r.status_code)
+		print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", r.status_code)
 		if r.status_code == 200:  # OK
 			failed_request_times = 0  # 重設歸零
 			find_last_post_with_tag = False
@@ -145,7 +145,7 @@ def listen(bot):
 							if is_new_post:
 								with open('repost.txt', 'w+', encoding='UTF-8') as f:
 									f.write(posts['id'])
-									print(posts['id'])
+									print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", posts['id'])
 									# 轉貼
 									repost_message = posts['message'].replace('#telegram', '').replace('#Telegram', '') + '\n原文連結：' + posts['permalink_url'] + '\n\n\n_等待管理員增加 hashtag_'
 									bot.send_message(telegram_channel_id, repost_message, parse_mode='Markdown')
@@ -155,7 +155,7 @@ def listen(bot):
 			
 			# 失敗超過一定次數就停止
 			if failed_request_times >= 5:
-				print("Attempt failed too many times!")
+				print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", "Attempt failed too many times!")
 				bot.send_message(telegram_group_id, "Not return 200 from Facebook API too many times, bot has paused.", parse_mode='Markdown')
 				return
 		time.sleep(20)
@@ -199,11 +199,11 @@ def unlisten(bot, update):
 		update.message.reply_text('Permission denied!')
 		return
 	
-	print("stop thread")
+	print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", "stop thread")
 	global listen_status, listen_group
 	listen_status = False
 	listen_group.join()  # 關閉執行緒
-	print("thread killed")
+	print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", "thread killed")
 	listen_group = threading.Thread(target = listen, args=(bot,))  # 重新設定執行緒
 	if not listen_status and not listen_group.is_alive():
 		update.message.reply_text('OK, now I get off work. YA~!')
@@ -229,13 +229,13 @@ def before_work_check():
 		find_last_post_with_tag = False
 		with open('repost.txt', 'w', encoding='UTF-8') as nf:
 			if not os.path.isfile('repost.txt'):
-				print("An error occurred when try to create reposter.txt!")
+				print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", "An error occurred when try to create reposter.txt!")
 				return 1
-			print("Create repost.txt")
+			print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", "Create repost.txt")
 			
 			# 建立檔案後別忘記要填入最新的貼文捏
 			r = requests.get('https://graph.facebook.com/{}/feed?fields=admin_creator,created_time,id,message,message_tags,permalink_url,link,from&access_token={}'.format(fb_group_id, fb_token))
-			print(r.status_code)
+			print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", r.status_code)
 			if r.status_code == 200:
 				for posts in r.json()['data']:
 					if find_last_post_with_tag:
@@ -245,10 +245,10 @@ def before_work_check():
 						for tags in posts['message_tags']:
 							if tags['id'] == '276859169113184':
 								nf.write(posts['id'])
-								print("Find post with specific hashtag, bot record it now.")
+								print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", "Find post with specific hashtag, bot record it now.")
 								find_last_post_with_tag = True
 						if not find_last_post_with_tag:
-							print("Can't find post with specific hashtag")
+							print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", "Can't find post with specific hashtag")
 			else:
 				return 1
 	
