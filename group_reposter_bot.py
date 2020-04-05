@@ -121,24 +121,23 @@ def is_telegram_admin(telegram_user_id):
 def listen():
 	print('thread')
 	failed_request_times = 0
-	while True:
-		if listen_status:
-			r = requests.get('https://graph.facebook.com/{}/feed?fields=admin_creator,created_time,id,message,message_tags,permalink_url,link,from&access_token={}'.format(fb_group_id, fb_token))
-			if r.status_code == 200:  # OK
-				failed_request_times = 0  # 重設歸零
-				# TODO: 分析內容並轉貼
-				pass
-			else:
-				failed_request_times += 1
-				
-				# 失敗超過一定次數就停止
-				if failed_request_times >= 5:
-					# TODO: 通知大家
-					print("Attempt failed too many times!")
-					return
-			time.sleep(30)
+	while listen_status:
+		r = requests.get('https://graph.facebook.com/{}/feed?fields=admin_creator,created_time,id,message,message_tags,permalink_url,link,from&access_token={}'.format(fb_group_id, fb_token))
+		print(r.status_code)
+		if r.status_code == 200:  # OK
+			failed_request_times = 0  # 重設歸零
+			# TODO: 分析內容並轉貼
+			pass
 		else:
-			return
+			failed_request_times += 1
+			
+			# 失敗超過一定次數就停止
+			if failed_request_times >= 5:
+				# TODO: 通知大家
+				print("Attempt failed too many times!")
+				return
+		time.sleep(30)
+	return
 
 
 # 叫機器人起來工作了
