@@ -204,10 +204,33 @@ def bot_work_status(bot, update):
 def before_work_check():
 	# 檢查必要檔案是否存在
 	if not os.path.isfile('repost.txt'):
+		find_last_post_with_tag = False
 		with open('repost.txt', 'w', encoding='UTF-8') as nf:
 			if not os.path.isfile('repost.txt'):
 				print("An error occurred when try to create reposter.txt!")
 				return 1
+			print("Create repost.txt")
+			
+			# 建立檔案後別忘記要填入最新的貼文捏
+			r = requests.get('https://graph.facebook.com/{}/feed?fields=admin_creator,created_time,id,message,message_tags,permalink_url,link,from&access_token={}'.format(fb_group_id, fb_token))
+			print(r.status_code)
+			if r.status_code == 200:
+				for posts in r.json()['data']:
+					if find_last_post_with_tag:
+						break
+					
+					if 'message_tags' in posts:
+						for tags in posts['message_tags']:
+							if tags['id'] == '276859169113184':
+								nf.write(posts['id'])
+								print("Find post with specific hashtag, bot record it now.")
+								find_last_post_with_tag = True
+							else:
+								print("Can't find post with specific hashtag")
+			else:
+				return 1
+	
+	# 檢查完成
 	return 0
 
 
