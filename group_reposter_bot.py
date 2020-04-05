@@ -155,8 +155,8 @@ def listen(bot):
 			
 			# 失敗超過一定次數就停止
 			if failed_request_times >= 5:
-				# TODO: 通知大家
 				print("Attempt failed too many times!")
+				bot.send_message(telegram_group_id, "Not return 200 from Facebook API too many times, bot has paused.", parse_mode='Markdown')
 				return
 		time.sleep(20)
 	return
