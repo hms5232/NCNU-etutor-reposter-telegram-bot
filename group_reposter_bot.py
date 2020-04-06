@@ -177,6 +177,18 @@ def start_work(bot, update):
 		return
 	
 	global listen_status, listen_group
+	# 檢查是否已有監聽執行緒
+	if listen_group.is_alive():
+		print('thread already exists.')
+		'''
+			https://python-telegram-bot.readthedocs.io/en/stable/telegram.message.html
+
+			雖然 reply_text 方法不能設定解析模式，但可以呼叫其他方法來指定如何解析文字
+			例如：reply_html()，其為 bot.send_message(update.message.chat_id, parse_mode=ParseMode.HTML, *args, **kwargs) 的縮寫
+		'''
+		update.message.reply_html('<strike>ヽ(∀ﾟ )人(ﾟ∀ﾟ)人( ﾟ∀)人(∀ﾟ )人(ﾟ∀ﾟ)人( ﾟ∀)ﾉ</strike>影分身術禁止！')
+		return
+
 	listen_status = True
 	listen_group = threading.Thread(target = listen, args=(bot,))  # 重新設定執行緒
 	if listen_status:
@@ -204,7 +216,6 @@ def unlisten(bot, update):
 	listen_status = False
 	listen_group.join()  # 關閉執行緒
 	print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", "thread killed")
-	listen_group = threading.Thread(target = listen, args=(bot,))  # 重新設定執行緒
 	if not listen_status and not listen_group.is_alive():
 		update.message.reply_text('OK, now I get off work. YA~!')
 	else:
