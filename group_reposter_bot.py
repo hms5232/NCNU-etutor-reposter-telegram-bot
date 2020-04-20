@@ -13,6 +13,7 @@ import requests
 import time
 import threading
 import os
+import datetime
 
 
 # 設定一些個人的環境變數
@@ -140,12 +141,14 @@ def listen(bot):
 					for tags in posts['message_tags']:
 						if tags['id'] == '276859169113184':  # FB 上對「telegram」這個 hash tag 給的 id
 							with open('repost.txt', 'r', encoding='UTF-8') as f:
-								if f.read().find(posts['id']) == -1:  # 沒有比對到符合字串 => 還沒 PO 過
+								last_record = f.read()  # 紀錄上最後一篇貼文/更新的時間戳記
+								if last_record < posts['created_time']:  # 發現貼文時間大於紀錄的時間 => 推斷是新貼文
 									is_new_post = True
 							if is_new_post:
 								with open('repost.txt', 'w+', encoding='UTF-8') as f:
-									f.write(posts['id'])
-									print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", posts['id'])
+									# 轉貼前要先更新紀錄
+									f.write(posts['created_time'])
+									print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", posts['created_time'], posts['id'])
 									# 轉貼
 									repost_message = posts['message'].replace('#telegram', '').replace('#Telegram', '') + '\n原文連結：' + posts['permalink_url'] + '\n\n\n_等待管理員增加 hashtag_'
 									bot.send_message(telegram_channel_id, repost_message, parse_mode='Markdown')
@@ -244,24 +247,8 @@ def before_work_check():
 				return 1
 			print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", "Create repost.txt")
 			
-			# 建立檔案後別忘記要填入最新的貼文捏
-			r = requests.get('https://graph.facebook.com/{}/feed?fields=admin_creator,created_time,id,message,message_tags,permalink_url,link,from&access_token={}'.format(fb_group_id, fb_token))
-			print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", r.status_code)
-			if r.status_code == 200:
-				for posts in r.json()['data']:
-					if find_last_post_with_tag:
-						break
-					
-					if 'message_tags' in posts:
-						for tags in posts['message_tags']:
-							if tags['id'] == '276859169113184':
-								nf.write(posts['id'])
-								print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", "Find post with specific hashtag, bot record it now.")
-								find_last_post_with_tag = True
-						if not find_last_post_with_tag:
-							print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", "Can't find post with specific hashtag")
-			else:
-				return 1
+			# 建立檔案後別忘記要填入現在的時間
+			nf.write(datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S+0000"))
 	
 	# 檢查完成
 	return 0
