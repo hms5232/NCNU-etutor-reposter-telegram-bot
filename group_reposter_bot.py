@@ -95,7 +95,7 @@ def reload_config(bot, update):
 	# 先檢查是不是 telegram 管理員
 	if not is_telegram_admin(update.message.from_user.id):
 		# 不是管理員更新個X
-		# TODO: 發通知到群組？
+		bot.sendMessage(telegram_group_id, '使用者 {}（username：{}）在{}嘗試操作機器人遭拒'.format(update.message.from_user.full_name, update.message.from_user.username, time.strftime("%Y/%m/%d %H:%M:%S")))
 		update.message.reply_text('Permission denied!')
 		return
 	
@@ -170,7 +170,7 @@ def start_work(bot, update):
 	# 先檢查是不是 telegram 管理員
 	if not is_telegram_admin(update.message.from_user.id):
 		# 不是管理員用個X
-		# TODO: 發通知到群組？
+		bot.sendMessage(telegram_group_id, '使用者 {}（username：{}）在{}嘗試操作機器人遭拒'.format(update.message.from_user.full_name, update.message.from_user.username, time.strftime("%Y/%m/%d %H:%M:%S")))
 		update.message.reply_text('Permission denied!')
 		return
 	
@@ -210,7 +210,7 @@ def unlisten(bot, update):
 	# 先檢查是不是 telegram 管理員
 	if not is_telegram_admin(update.message.from_user.id):
 		# 不是管理員用個X
-		# TODO: 發通知到群組？
+		bot.sendMessage(telegram_group_id, '使用者 {}（username：{}）在{}嘗試操作機器人遭拒'.format(update.message.from_user.full_name, update.message.from_user.username, time.strftime("%Y/%m/%d %H:%M:%S")))
 		update.message.reply_text('Permission denied!')
 		return
 	
