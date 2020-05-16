@@ -5,7 +5,7 @@
 @echo:
 IF EXIST "%cd%\.git" (
 @echo on
-git checkout master
+git checkout ytpan
 git pull
 ) ELSE (
 @echo Git repo not found!
