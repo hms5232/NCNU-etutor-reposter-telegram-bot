@@ -150,8 +150,13 @@ def listen(bot):
 									f.write(posts['created_time'])
 									print("[", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "]", posts['created_time'], posts['id'])
 									# 轉貼
-									repost_message = posts['message'].replace('#telegram', '').replace('#Telegram', '') + '\n原文連結：' + posts['permalink_url'] + '\n\n\n_等待管理員增加 hashtag_'
-									bot.send_message(telegram_channel_id, repost_message, parse_mode='Markdown')
+									# 檢查是否為指定關鍵字，是的話則採「無聲訊息」傳送
+									if posts['message'].find('#Telegram') != -1:  # send without sound
+										repost_message = posts['message'].replace('#Telegram', '') + '\n原文連結：' + posts['permalink_url'] + '\n\n\n_等待管理員增加 hashtag_'
+										bot.send_message(telegram_channel_id, repost_message, parse_mode='Markdown', disable_notification="True")
+									else:
+										repost_message = posts['message'].replace('#telegram', '') + '\n原文連結：' + posts['permalink_url'] + '\n\n\n_等待管理員增加 hashtag_'
+										bot.send_message(telegram_channel_id, repost_message, parse_mode='Markdown')
 							find_last_post_with_tag = True
 		else:
 			failed_request_times += 1
