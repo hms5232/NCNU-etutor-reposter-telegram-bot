@@ -22,7 +22,7 @@
 3. `pip install pipenv`
 4. 切換至專案目錄下後執行 `pipenv install`
 5. 複製 config.ini.example 成 config.ini 並填入對應的設定內容
-5. `pipenv shell` 進入虛擬環境後，Windows 使用者請執行 `py group_reposter_bot.py.py`；Linux 使用者請執行 `python3 group_reposter_bot.py`
+5. Windows 使用者請執行 `pipenv run py group_reposter_bot.py`；Linux 使用者請執行 `pipenv run python3 group_reposter_bot.py`
 
 ## LICENSE
 See [LICENSE](https://github.com/hms5232/NCNU-etutor-reposter-telegram-bot/blob/master/LICENSE).
