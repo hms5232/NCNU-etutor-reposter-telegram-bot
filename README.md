@@ -1,5 +1,5 @@
 # NCNU-etutor-reposter-telegram-bot
-為[暨大數位學伴計畫](https://www.facebook.com/NCNU.TheProjectofOnlineTutoring/)設計的社團貼文轉貼至 telegram 頻道的轉貼機器人
+為[暨大數位學伴計畫](https://www.facebook.com/NCNU.TheProjectofOnlineTutoring/)設計的社團貼文轉貼至 [telegram 頻道](https://t.me/ncnu_etutor_post)的轉貼機器人
 
 ## 需求
 1. Python 3.7.6 or later
